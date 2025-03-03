@@ -3,7 +3,44 @@ const { scrapeSearch, scrapeHome, scrapeEpisode, scrapeAnime, scrapePagination, 
 const serverless = require('serverless-http');
 
 const app = express();
-const PORT = 3000;
+
+// Route for API Usage Instructions
+app.get('/', (req, res) => {
+    res.json({
+        message: "Welcome to the Ratuhentai API! Here are the available routes:",
+        routes: {
+            "/search": {
+                description: "Search for anime by title",
+                queryParam: "q (the anime title)",
+                example: "/search?q=action"
+            },
+            "/home/page/:page": {
+                description: "Get the latest anime list with pagination",
+                params: "page (page number)",
+                example: "/home/page/1"
+            },
+            "/anime/:slug": {
+                description: "Get detailed information about a specific anime",
+                params: "slug (the anime slug from URL)",
+                example: "/anime/naruto"
+            },
+            "/episode/:slug": {
+                description: "Get episode details for a specific anime episode",
+                params: "slug (the episode slug)",
+                example: "/episode/naruto-episode-1"
+            },
+            "/pagination": {
+                description: "Get pagination info (current page and next page)",
+                example: "/pagination"
+            },
+            "/genre/:genre": {
+                description: "Get a list of anime for a specific genre",
+                params: "genre (the genre of anime, e.g., action, romance)",
+                example: "/genre/action"
+            }
+        }
+    });
+});
 
 // Route for Search
 app.get('/search', async (req, res) => {
