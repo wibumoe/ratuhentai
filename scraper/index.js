@@ -3,6 +3,58 @@ const cheerio = require('cheerio');
 
 const BASE_URL = 'https://ratuhentai.anitokiryuu.workers.dev/';
 
+
+// Fungsi untuk Scraping Search (pencarian berdasarkan keyword)
+const scrapeSearch = async (query) => {
+    const url = `${BASE_URL}/?s=${encodeURIComponent(query)}&post_type=anime`;  // Menggunakan query search URL
+    const $ = await fetchHTML(url);
+    if (!$) return null;
+
+    const animeList = [];
+    $('.bsz').each((index, element) => {
+        const title = $(element).find('.tt h2').text().trim();
+        const link = $(element).find('a').attr('href').replace(BASE_URL, '/');  // Menggunakan link relatif
+        const image = $(element).find('img').attr('src');
+        const status = $(element).find('.tt span').text().trim();
+
+        animeList.push({
+            title,
+            link,  // Link relatif
+            image,
+            status
+        });
+    });
+
+    return animeList;
+};
+
+// Fungsi untuk Scraping Genre
+const scrapeGenre = async (genre) => {
+    const url = `${BASE_URL}/genre/${genre}/`;  // Buat URL berdasarkan genre
+    const $ = await fetchHTML(url);
+    if (!$) return null;
+
+    const animeList = [];
+    $('.bsz').each((index, element) => {
+        const title = $(element).find('.tt h2').text().trim();
+        const link = $(element).find('a').attr('href').replace(BASE_URL, '/');  // Menggunakan link relatif
+        const image = $(element).find('img').attr('src');
+        const status = $(element).find('.tt span').text().trim();
+
+        animeList.push({
+            title,
+            link,  // Link relatif
+            image,
+            status
+        });
+    });
+
+    return animeList;
+};
+
+// Ekspor Fungsi Scraper
+module.exports = { scrapeGenre };
+
 // Fungsi untuk mengambil HTML dari halaman
 const fetchHTML = async (url) => {
     try {
@@ -18,41 +70,31 @@ const fetchHTML = async (url) => {
     }
 };
 
-// ✅ Scrape Beranda (Daftar Anime Terbaru) dengan Pagination
+// Fungsi untuk mengambil Anime Terbaru dengan Pagination
 const scrapeHome = async (page = 1) => {
-    const url = page > 1 ? `${BASE_URL}page/${page}/` : BASE_URL;
+    const url = `${BASE_URL}/page/${page}`; // Menggunakan URL dengan nomor halaman
     const $ = await fetchHTML(url);
     if (!$) return null;
 
-    let latestAnime = [];
-    $('.listupd > article').each((_, el) => {
-        const element = $(el);
-        const title = element.find('.tt').text().trim();
-        const animeUrl = element.find('a').attr('href') || null;
-        const image = element.find('img').attr('src') || null;
+    const animeList = [];
+    $('.bsz').each((index, element) => {
+        const title = $(element).find('.tt h2').text().trim();
+        const link = $(element).find('a').attr('href').replace(BASE_URL, '/');  // Menggunakan link relatif
+        const image = $(element).find('img').attr('src');
+        const status = $(element).find('.tt span').text().trim();
 
-        latestAnime.push({ 
-            title, 
-            url: animeUrl ? animeUrl.replace(BASE_URL, '/episode/') : null, 
-            image 
+        animeList.push({
+            title,
+            link,  // Link relatif
+            image,
+            status
         });
     });
 
-    // 🔹 Ambil URL halaman sebelumnya & berikutnya
-    const prevPage = $('.pagination .prev').attr('href') || null;
-    const nextPage = $('.pagination .next').attr('href') || null;
-
-    return {
-        latestAnime,
-        prevPage: prevPage ? prevPage.replace(BASE_URL, '/home?page=') : null,
-        nextPage: nextPage ? nextPage.replace(BASE_URL, '/home?page=') : null
-    };
+    return animeList;
 };
 
-module.exports = { scrapeHome };
-
-
-// 2️⃣ Scrape Halaman Episode (Streaming & Download)
+// Fungsi untuk Scraping Episode
 const scrapeEpisode = async (episodeUrl) => {
     const $ = await fetchHTML(episodeUrl);
     if (!$) return null;
@@ -99,11 +141,7 @@ const scrapeEpisode = async (episodeUrl) => {
     };
 };
 
-
-// Endpoint Scraper
-module.exports = { scrapeEpisode };
-
-// 3️⃣ Scrape Halaman Detail Anime (Info + Episode List)
+// Fungsi untuk Scraping Detail Anime
 const scrapeAnime = async (animeUrl) => {
     const $ = await fetchHTML(animeUrl);
     if (!$) return null;
@@ -148,5 +186,19 @@ const scrapeAnime = async (animeUrl) => {
     };
 };
 
-// 4️⃣ Endpoint Scraper
-module.exports = { scrapeHome, scrapeEpisode, scrapeAnime };
+// Fungsi untuk Scraping Pagination (mengambil data halaman)
+const scrapePagination = async (url) => {
+    const $ = await fetchHTML(url);
+    if (!$) return null;
+
+    const currentPage = $('.page-numbers.current').text().trim(); // Halaman saat ini
+    const nextPage = $('.next.page-numbers').attr('href'); // Link halaman berikutnya
+
+    return {
+        currentPage,
+        nextPage
+    };
+};
+
+// Ekspor Fungsi Scraper
+module.exports = { scrapeSearch, scrapeGenre, scrapeHome, scrapeEpisode, scrapeAnime, scrapePagination };
