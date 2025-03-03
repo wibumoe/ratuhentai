@@ -1,14 +1,13 @@
 {
-  "name": "ratuhentai-api",
-  "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.17.1",
-    "cheerio": "^1.0.0-rc.3",
-    "axios": "^0.21.1",
-    "serverless-http": "^2.7.0"
+    "axios": "^1.8.1",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
   },
-  "devDependencies": {
-    "vercel": "^23.0.0"
+  "scripts": {
+    "start": "node index.js",
+    "test": "nodemon index.js"
   }
 }
