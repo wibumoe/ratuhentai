@@ -1,5 +1,5 @@
 const express = require('express');
-const { scrapeSearch, scrapeHome, scrapeEpisode, scrapeAnime, scrapePagination, scrapeGenre } = require('../scraper');
+const { scrapeSearch, scrapeHome, scrapeEpisode, scrapeAnime, scrapePagination, scrapeGenre } = require('./scraper');
 const serverless = require('serverless-http');
 
 const app = express();
